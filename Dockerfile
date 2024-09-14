@@ -22,10 +22,10 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copiar o JAR da primeira etapa para a segunda
-COPY --from=build /app/target/WorkShop_spring.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
-# Expor a porta 8080 (se necessário)
-EXPOSE 8085
+# Expor a porta 8080
+EXPOSE 8080
 
 # Comando para iniciar a aplicação quando o contêiner for executado
 ENTRYPOINT ["java", "-jar", "app.jar"]
