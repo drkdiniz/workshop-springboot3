@@ -1,16 +1,31 @@
+# Primeira etapa: Construir a aplicação
 FROM ubuntu:latest AS build
 
-RUN apt-get update
-RUN apt-get install openjdk-17-jdk -y
-COPY . .
+# Atualizar o sistema e instalar o JDK e o Maven
+RUN apt-get update && \
+    apt-get install -y openjdk-17-jdk maven
 
-RUN apt-get install maven -y
-RUN mvn clean install
+# Configurar o diretório de trabalho
+WORKDIR /app
 
-FROM openjdk:17-slim
+# Copiar os arquivos necessários para o diretório de trabalho
+COPY src src
+COPY pom.xml .
 
-EXPOSE 8080
+# Baixar as dependências do Maven e construir o projeto
+RUN mvn clean package -DskipTests
 
-COPY --from=build /target/course-0.0.1-SNAPSHOT.jar app.jar
+# Segunda etapa: Criar uma imagem mais leve com apenas o JAR
+FROM openjdk:17-jdk-slim
 
-ENTRYPOINT [ "java", "-jar", "app.jar"]
+# Configurar o diretório de trabalho
+WORKDIR /app
+
+# Copiar o JAR da primeira etapa para a segunda
+COPY --from=build /app/target/DockerAgape.jar app.jar
+
+# Expor a porta 8080 (se necessário)
+EXPOSE 8085
+
+# Comando para iniciar a aplicação quando o contêiner for executado
+ENTRYPOINT ["java", "-jar", "app.jar"]
